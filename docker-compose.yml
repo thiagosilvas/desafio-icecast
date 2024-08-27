@@ -1,13 +1,39 @@
-icecast:
-  image: moul/icecast
-  volumes:
-  - logs:/var/log/icecast2
-  - /etc/localtime:/etc/localtime:ro
-  environment:
-  - ICECAST_SOURCE_PASSWORD=aaa
-  - ICECAST_ADMIN_PASSWORD=bbb
-  - ICECAST_PASSWORD=ccc
-  - ICECAST_RELAY_PASSWORD=ddd
-  - ICECAST_HOSTNAME=noise.example.com
-  ports:
-  - 8000:8000
+version: '3.8'  
+
+services:
+  icecast:
+    image: moul/icecast
+    volumes:
+      - icecast-logs:/var/log/icecast2
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - ICECAST_SOURCE_PASSWORD=aaa
+      - ICECAST_ADMIN_PASSWORD=bbb
+      - ICECAST_PASSWORD=ccc
+      - ICECAST_RELAY_PASSWORD=ddd
+      - ICECAST_HOSTNAME=icecast
+    ports:
+      - "8000:8000"
+    networks:
+      - radio-network
+   
+
+  web:
+    image: nginx
+    container_name: nginx-server
+    restart: always
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+    networks:
+      - radio-network
+    depends_on:
+      - icecast  
+
+volumes:
+  icecast-logs:
+
+networks:
+  radio-network:
+    driver: bridge
